@@ -1,7 +1,7 @@
 ;; -*- coding: utf-8 -*-
 ;;
 ;; numinfix.scm
-;; 2014-8-30 v1.02
+;; 2014-8-31 v1.03
 ;;
 ;; ＜内容＞
 ;;   Gaucheで中置記法による数値演算を可能にするためのモジュールです。
@@ -21,7 +21,7 @@
 ;;
 ;;   使用可能な演算子 (レベルが小さいほど優先順位が高い)
 ;;     レベル1 : **             (べき乗)
-;;     レベル2 : * / *. /. \ %  (乗算,除算,不正確数乗算,不正確数除算,整数除算,剰余)
+;;     レベル2 : * / *. /. \ %  (乗算,除算,不正確数乗算,不正確数除算,整数除算,整数剰余)
 ;;     レベル3 : + - +. -.      (加算,減算,不正確数加算,不正確数減算)
 ;;     レベル4 : << >>          (左ビットシフト,右ビットシフト(符号ありシフトのみ))
 ;;     レベル5 : logand logior logxor (ビットAND,ビットOR,ビットXOR)
@@ -104,7 +104,12 @@
     (,**     . 50)))
 
 ;; 中置記法による数値演算 (操車場アルゴリズムに近いもの)
-(define (calc ops vals rest)
+;; 引数
+;;   ops   演算子のスタック
+;;   prs   演算子の優先度のスタック(キャッシュ用)
+;;   vals  値のスタック
+;;   rest  読み込むトークンの残り
+(define (calc ops prs vals rest)
   (if (null? rest)
     ;; 読み込むトークンがもうない場合
     (let loop ((ops ops) (vals vals))
@@ -114,35 +119,33 @@
         (loop (cdr ops)
               (cons ((car ops) (cadr vals) (car vals)) (cddr vals)))))
     ;; 読み込むトークンがまだある場合
-    (let ((op1   (car rest))
-          (pr1   -1)
-          (val   0)
-          (rest2 (cdr rest)))
-      (set! pr1 (assoc-ref numinfix-operator op1 -1))
-      (if (< pr1 0) (errorf "unknown binary operator: ~s" op1))
+    (let* ((op    (car rest))
+           (pr    (assoc-ref numinfix-operator op -1))
+           (rest2 (cdr rest)))
+      (if (< pr 0) (errorf "unknown binary operator: ~s" op))
       (if (null? rest2) (error "invalid expression"))
-      (set! val   (car rest2))
-      (set! rest2 (cdr rest2))
       (if (null? ops)
-        (calc (cons op1 ops)
-              (cons val vals)
-              rest2)
-        (let* ((op2 (car ops))
-               (pr2 (assoc-ref numinfix-operator op2 -1)))
-          (if (<= pr1 pr2)
+        (calc (cons op ops)
+              (cons pr prs)
+              (cons (car rest2) vals)
+              (cdr rest2))
+        (let1 pr2 (car prs)
+          (if (<= pr pr2)
             (calc (cdr ops)
-                  (cons (op2 (cadr vals) (car vals)) (cddr vals))
+                  (cdr prs)
+                  (cons ((car ops) (cadr vals) (car vals)) (cddr vals))
                   rest)
-            (calc (cons op1 ops)
-                  (cons val vals)
-                  rest2)))))))
+            (calc (cons op ops)
+                  (cons pr prs)
+                  (cons (car rest2) vals)
+                  (cdr rest2))))))))
 
 
 ;; 中置記法による数値演算を可能にするモードに入る
 (define (numinfix-on)
   (rlet1 mold (get-gf-method object-apply 1 #t `(,<number>))
     (define-method object-apply ((n <number>) . rest)
-      (calc () (list n) rest))))
+      (calc () () (list n) rest))))
 
 ;; 中置記法による数値演算を可能にするモードを抜ける
 (define (numinfix-off :optional (mold #f))
