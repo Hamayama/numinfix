@@ -1,7 +1,7 @@
 ;; -*- coding: utf-8 -*-
 ;;
 ;; numinfix.scm
-;; 2014-8-31 v1.03
+;; 2014-8-31 v1.04
 ;;
 ;; ＜内容＞
 ;;   Gaucheで中置記法による数値演算を可能にするためのモジュールです。
@@ -63,45 +63,34 @@
 ;;      例えば (5 * (+ 1 1) * 2) や ((cos 0) + 1) のように記述できます。
 ;;
 (define-module numinfix
-  (export numinfix-on numinfix-off numinfix-operator << >> \ % **))
+  (export numinfix-on numinfix-off numinfix-operator ** \ % << >>))
 (select-module numinfix)
 
 ;; 2項演算子の記号の定義
-;(define logand logand)
-;(define logior logior)
-;(define logxor logxor)
-(define <<  ash)
-(define >>  (lambda (x n) (ash x (- n))))
-;(define +   +)
-;(define -   -)
-;(define +.  +.)
-;(define -.  -.)
-;(define *   *)
-;(define /   /)
-;(define *.  *.)
-;(define /.  /.)
+(define **  expt)
 (define \   quotient)
 (define %   modulo)
-(define **  expt)
+(define <<  ash)
+(define >>  (lambda (n1 n2) (ash n1 (- n2))))
 
 ;; 2項演算子の優先順位の定義 (数値が大きいほど優先順位が高い)
 (define numinfix-operator
-  `((,logand . 10)
-    (,logior . 10)
-    (,logxor . 10)
-    (,<<     . 20)
-    (,>>     . 20)
-    (,+      . 30)
-    (,-      . 30)
-    (,+.     . 30)
-    (,-.     . 30)
+  `((,**     . 50)
     (,*      . 40)
     (,/      . 40)
     (,*.     . 40)
     (,/.     . 40)
     (,\      . 40)
     (,%      . 40)
-    (,**     . 50)))
+    (,+      . 30)
+    (,-      . 30)
+    (,+.     . 30)
+    (,-.     . 30)
+    (,<<     . 20)
+    (,>>     . 20)
+    (,logand . 10)
+    (,logior . 10)
+    (,logxor . 10)))
 
 ;; 中置記法による数値演算 (操車場アルゴリズムに近いもの)
 ;; 引数
