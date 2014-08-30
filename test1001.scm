@@ -1,7 +1,7 @@
 ;; -*- coding: utf-8 -*-
 ;;
 ;; noqlistのテスト
-;; 2014-8-29
+;; 2014-8-30
 ;;
 (use gauche.test)
 (test-start "numinfix")
@@ -35,7 +35,7 @@
 (test* "(8 - 2 - 1)"                5     (8 - 2 - 1))
 (test* "(1 + 2 * 3 / 4 - 5)"        -5/2  (1 + 2 * 3 / 4 - 5))
 (define x 100)
-(test* "(x + 1 + x * x + 30 / 3)"   10111 (x + 1 + x * x + 10))
+(test* "(x + 1 + x * x + 30 / 3)"   10111 (x + 1 + x * x + 30 / 3))
 (test* "(5 * (+ 1 1) * 2)"          20    (5 * (+ 1 1) * 2))
 
 (test-section "error")
