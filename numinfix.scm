@@ -1,7 +1,7 @@
 ;; -*- coding: utf-8 -*-
 ;;
 ;; numinfix.scm
-;; 2014-8-31 v1.05
+;; 2014-8-31 v1.06
 ;;
 ;; ＜内容＞
 ;;   Gaucheで中置記法による数値演算を可能にするためのモジュールです。
@@ -132,7 +132,6 @@
 (define (numinfix-on)
   (rlet1 mold (get-gf-method object-apply 1 #t `(,<number>))
     (define-method object-apply ((n <number>) . rest)
-      ;(calc () () (list n) rest))))
       (calc () (list n) rest))))
 
 ;; 中置記法による数値演算を可能にするモードを抜ける
