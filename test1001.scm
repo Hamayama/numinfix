@@ -1,7 +1,7 @@
 ;; -*- coding: utf-8 -*-
 ;;
 ;; noqlistのテスト
-;; 2014-8-30
+;; 2014-8-31
 ;;
 (use gauche.test)
 (test-start "numinfix")
@@ -11,11 +11,19 @@
 
 (test-section "numinfix-on")
 (numinfix-on)
+(test* "in-and" #t   (1 in-and 2))
+(test* "in-or"  #t   (1 in-or 2))
 (test* "logand" 3    (7 logand 3))
 (test* "logior" 7    (7 logior 3))
 (test* "logxor" 4    (7 logxor 3))
 (test* "<<"     8    (1 << 3))
 (test* ">>"     1    (8 >> 3))
+(test* "<"      #t   (1 < 3))
+(test* "<="     #t   (1 <= 3))
+(test* ">"      #f   (1 > 3))
+(test* ">="     #f   (1 >= 3))
+(test* "=="     #f   (1 == 3))
+(test* "!="     #t   (1 != 3))
 (test* "+"      3    (1 + 2))
 (test* "-"      -1   (1 - 2))
 (test* "+."     3.5  (1.2 + 2.3) (lambda (expected result) (< (abs (- expected result)) 1.0e-10)))
@@ -38,6 +46,8 @@
 (define x 100)
 (test* "(x + 1 + x * x + 30 / 3)"   10111 (x + 1 + x * x + 30 / 3))
 (test* "(5 * (+ 1 1) * 2)"          20    (5 * (+ 1 1) * 2))
+(test* "((1 < 2) in-and (1 >= 3))"  #f    ((1 < 2) in-and (1 >= 3)))
+(test* "((1 < 2) in-or  (1 >= 3))"  #t    ((1 < 2) in-or  (1 >= 3)))
 
 (test-section "error")
 (test* "(1 2)"       (test-error <error>) (1 2))
