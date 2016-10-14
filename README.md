@@ -92,9 +92,10 @@
 
 ## 環境等
 - OS
+  - Windows 8.1 (64bit)
   - Windows XP Home SP3
-  - Windows 8 (64bit)
 - 言語
+  - Gauche v0.9.5
   - Gauche v0.9.4
   - Gauche v0.9.3.3
 
@@ -112,6 +113,7 @@
 - 2014-9-5   v1.10 コメント修正のみ
 - 2014-9-17  v1.11 コメント修正のみ
 - 2014-11-26 v1.12 コメント修正のみ
+- 2016-10-14 v1.13 一部処理見直し(hash-table,numinfix-on/off,delete-gf-method)
 
 
-(2015-2-8)
+(2016-10-14)

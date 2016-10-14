@@ -1,7 +1,7 @@
 ;; -*- coding: utf-8 -*-
 ;;
 ;; numinfix.scm
-;; 2014-11-26 v1.12
+;; 2016-10-14 v1.13
 ;;
 ;; ＜内容＞
 ;;   Gaucheで中置記法による数値演算を可能にするためのモジュールです。
@@ -30,16 +30,17 @@
 
 ;; 2項演算子の優先順位の定義 (数値が大きいほど優先順位が高い)
 (define numinfix-operator
-  (hash-table 'eq?
-    `(,**     . 70)
-    `(,*      . 60) `(,/      . 60) `(,*.     . 60) `(,/.     . 60)
-    `(,\      . 60) `(,%      . 60)
-    `(,+      . 50) `(,-      . 50) `(,+.     . 50) `(,-.     . 50)
-    `(,<<     . 40) `(,>>     . 40)
-    `(,<      . 30) `(,<=     . 30) `(,>      . 30) `(,>=     . 30)
-    `(,==     . 30) `(,!=     . 30)
-    `(,logand . 20) `(,logior . 20) `(,logxor . 20)
-    `(,in-and . 10) `(,in-or  . 10)))
+  ($ hash-table 'eq?
+     `(,**     . 70)
+     `(,*      . 60) `(,/      . 60) `(,*.     . 60) `(,/.     . 60)
+     `(,\      . 60) `(,%      . 60)
+     `(,+      . 50) `(,-      . 50) `(,+.     . 50) `(,-.     . 50)
+     `(,<<     . 40) `(,>>     . 40)
+     `(,<      . 30) `(,<=     . 30) `(,>      . 30) `(,>=     . 30)
+     `(,==     . 30) `(,!=     . 30)
+     `(,logand . 20) `(,logior . 20) `(,logxor . 20)
+     `(,in-and . 10) `(,in-or  . 10)
+     ))
 
 ;; 中置記法による数値演算 (操車場アルゴリズムに近いもの)
 ;; 引数
@@ -78,9 +79,8 @@
 
 ;; 中置記法による数値演算を可能にするモードに入る
 (define (numinfix-on)
-  (rlet1 mold (list
-               (get-gf-method object-apply 1 #t `(,<number>))
-               (get-gf-method object-apply 1 #t `(,<boolean>)))
+  (rlet1 mold (list (get-gf-method object-apply 1 #t `(,<number>))
+                    (get-gf-method object-apply 1 #t `(,<boolean>)))
     (define-method object-apply ((n <number>) . rest)
       (calc () (list n) rest))
     (define-method object-apply ((n <boolean>) . rest)
@@ -88,18 +88,15 @@
 
 ;; 中置記法による数値演算を可能にするモードを抜ける
 (define (numinfix-off :optional (mold #f))
-  (cond ((and (list? mold) (= (length mold) 2))
-         (let ((mold1 (car  mold))
-               (mold2 (cadr mold)))
-           (if (is-a? mold1 <method>)
-             (add-method! object-apply mold1)
-             (delete-gf-method object-apply 1 #t `(,<number>)))
-           (if (is-a? mold2 <method>)
-             (add-method! object-apply mold2)
-             (delete-gf-method object-apply 1 #t `(,<boolean>)))))
-        (else
-         (delete-gf-method object-apply 1 #t `(,<number>))
-         (delete-gf-method object-apply 1 #t `(,<boolean>)))))
+  (let ((mold1 (list-ref mold 0 #f))
+        (mold2 (list-ref mold 1 #f)))
+    (if (is-a? mold1 <method>)
+      (add-method! object-apply mold1)
+      (delete-gf-method object-apply 1 #t `(,<number>)))
+    (if (is-a? mold2 <method>)
+      (add-method! object-apply mold2)
+      (delete-gf-method object-apply 1 #t `(,<boolean>)))
+    ))
 
 
 ;; ジェネリック関数のメソッドを種別を指定して取得する
@@ -123,6 +120,6 @@
 ;;   optional      メソッドの省略可能引数の有無(#tまたは#f)
 ;;   specializers  メソッドの引数の型を示す特定化子リスト(例えば `(,<number> ,<string>) 等)
 (define (delete-gf-method gf required optional specializers)
-  (let1 m (get-gf-method gf required optional specializers)
-    (if m (delete-method! gf m))))
+  (if-let1 m (get-gf-method gf required optional specializers)
+    (delete-method! gf m)))
 

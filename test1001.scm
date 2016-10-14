@@ -1,11 +1,12 @@
 ;; -*- coding: utf-8 -*-
 ;;
 ;; numinfixのテスト
-;; 2014-10-29
+;; 2016-10-14
 ;;
+(add-load-path "." :relative)
 (use gauche.test)
-(test-start "numinfix")
 
+(test-start "numinfix")
 (use numinfix)
 (test-module 'numinfix)
 
